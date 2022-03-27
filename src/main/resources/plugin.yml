@@ -1,0 +1,4 @@
+name: Recycler
+version: '${version}'
+main: com.github.u9g.recycler.Main
+api-version: 1.18

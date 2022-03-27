@@ -1,0 +1,11 @@
+giverecycler {
+    hook give
+    permission recycler.give
+    user player
+}
+
+recipesconfig {
+    hook config
+    permission recycler.config
+    user player
+}
