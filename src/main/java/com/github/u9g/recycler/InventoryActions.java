@@ -11,11 +11,11 @@ public class InventoryActions {
             inv.setItem(slot, null);
         }
         ItemStack item = inv.getItem(10);
-        var output = Main.INSTANCE.config.recipes.get(item.getType());
+        var output = Main.INSTANCE.recipeTable.get(item.getType(), item.getAmount());
         output.recipe().forEach((rawSlot, mat) ->
                 inv.setItem(
                         Constants.craftSlot2PrevSlot.get(rawSlot),
-                        Util.make(mat, makingPreview ? "Press anvil to recycle to components" : "").asQuantity(item.getAmount())
+                        Util.make(mat.itemType(), makingPreview ? "Press anvil to recycle to components" : "").asQuantity(mat.count())
                 )
         );
     }

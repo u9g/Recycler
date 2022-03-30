@@ -2,37 +2,41 @@ package com.github.u9g.recycler.data;
 
 import com.github.u9g.recycler.Constants;
 import com.github.u9g.recycler.Main;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 import redempt.redlib.config.ConfigManager;
 import redempt.redlib.config.annotations.ConfigMappable;
+import redempt.redlib.config.annotations.ConfigPostInit;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @ConfigMappable
 public class RecycleConfig {
-    public Map<Material, ItemRecycleRecipe> recipes;
+    public Map<ItemWithQuantity, ItemRecycleRecipe> recipes;
 
     public static RecycleConfig init() {
-        var plugin = Main.INSTANCE;
         final RecycleConfig recycleConfig = new RecycleConfig();
         recycleConfig.recipes = Map.of(
-        Material.IRON_PICKAXE, new ItemRecycleRecipe(false, Map.of(
-            0, Material.IRON_INGOT,
-            1, Material.IRON_INGOT,
-            2, Material.IRON_INGOT,
-            4, Material.STICK,
-            7, Material.STICK
+        new ItemWithQuantity(Material.IRON_PICKAXE, 1), new ItemRecycleRecipe(false, Map.of(
+            0, new ItemWithQuantity(Material.IRON_INGOT, 1),
+            1, new ItemWithQuantity(Material.IRON_INGOT, 1),
+            2, new ItemWithQuantity(Material.IRON_INGOT, 1),
+            4, new ItemWithQuantity(Material.STICK, 1),
+            7, new ItemWithQuantity(Material.STICK, 1)
         )),
-        Material.MELON, new ItemRecycleRecipe(true, Map.of(
-            0, Material.MELON_SLICE,
-            1, Material.MELON_SLICE,
-            2, Material.MELON_SLICE,
-            3, Material.MELON_SLICE,
-            4, Material.MELON_SLICE,
-            5, Material.MELON_SLICE,
-            6, Material.MELON_SLICE,
-            7, Material.MELON_SLICE,
-            8, Material.MELON_SLICE
+        new ItemWithQuantity(Material.MELON, 1), new ItemRecycleRecipe(true, Map.of(
+            0, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            1, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            2, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            3, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            4, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            5, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            6, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            7, new ItemWithQuantity(Material.MELON_SLICE, 1),
+            8, new ItemWithQuantity(Material.MELON_SLICE, 1)
         )));
         makeConfigManager(recycleConfig).saveDefaults().load();
         return recycleConfig;
@@ -43,12 +47,21 @@ public class RecycleConfig {
         return configManager
                 .addConverter(
                         Constants.MATERIAL_CONVERTER, configManager.getConversionManager().getConverter(Constants.MATERIAL_CONVERTER))
+                .addConverter(ItemWithQuantity.class, ItemWithQuantity::fromString, ItemWithQuantity::toString)
                 .target(config);
     }
 
-    public void save(Material keyItem, Map<Integer, Material> recipe) {
+    public void save(ItemWithQuantity keyItem, Map<Integer, ItemWithQuantity> recipe) {
         recipes.put(keyItem, new ItemRecycleRecipe(true, recipe));
+        Main.INSTANCE.recipeTable.put(keyItem.itemType(), keyItem.count(), new ItemRecycleRecipe(true, recipe));
         makeConfigManager(this).save();
+    }
+
+    @ConfigPostInit
+    public void afterInit() {
+        recipes.forEach((k, v) -> {
+            Main.INSTANCE.recipeTable.put(k.itemType(), k.count(), v);
+        });
     }
 }
 

@@ -20,8 +20,6 @@ import redempt.redlib.inventorygui.InventoryGUI;
 import redempt.redlib.inventorygui.ItemButton;
 import redempt.redlib.misc.Task;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.github.u9g.recycler.Constants.*;
@@ -109,8 +107,8 @@ public class RecyclerOpenHandler implements Listener {
                 Util.applyMask(gui, recyclerMask, glassMask);
                 return;
             }
-            var recipes = Main.INSTANCE.config.recipes.get(item.getType());
-            if (recipes == null || !recipes.enabled()) return;
+            var recipes = Main.INSTANCE.recipeTable.get(item.getType(), item.getAmount());
+            if (recipes == null || !recipes.enabled() || recipes.recipe().keySet().size() == 0) return;
             craftSlot2PrevSlot.values().forEach(i -> inv.setItem(i, null));
             setupRecycleOutput(gui, true);
             gui.addButton(ANVIL_BUTTON, makeBtn(gui, playerInv, dropItemsLocation));

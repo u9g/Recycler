@@ -1,5 +1,6 @@
 package com.github.u9g.recycler;
 
+import com.github.u9g.recycler.data.ItemWithQuantity;
 import com.github.u9g.recycler.data.RecycleConfig;
 import com.github.u9g.u9gutils.ItemBuilder;
 import net.kyori.adventure.text.Component;
@@ -14,10 +15,7 @@ import redempt.redlib.inventorygui.InventoryGUI;
 import redempt.redlib.inventorygui.ItemButton;
 import redempt.redlib.misc.Task;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class CommandHandler {
     private final int ITEM_SLOT = 10;
@@ -54,10 +52,10 @@ public class CommandHandler {
                         gui.openSlot(slot);
                         inv.setItem(slot, null);
                 });
-                var recipes = Main.INSTANCE.config.recipes.get(item.getType());
+                var recipes = Main.INSTANCE.recipeTable.get(item.getType(), item.getAmount());
                 if (recipes != null) {
                     recipes.recipe().forEach((slot, material) ->
-                            inv.setItem(Constants.craftSlot2PrevSlot.get(slot), ItemBuilder.of(material).build()));
+                            inv.setItem(Constants.craftSlot2PrevSlot.get(slot), ItemBuilder.of(material.itemType()).count(material.count()).build()));
                 }
                 gui.addButton(SAVE_SLOT, new ItemButton(SAVE_ITEM) {
                     @Override
@@ -75,16 +73,17 @@ public class CommandHandler {
 
     public void onSave(InventoryGUI gui) {
         Inventory inv = gui.getInventory();
-        Map<Integer, Material> materials = new HashMap<>();
+        Map<Integer, ItemWithQuantity> materials = new HashMap<>();
         int i = -1;
         for (int value : Constants.craftSlot2PrevSlot.values().stream().sorted().toList()) {
             i++;
             var item = inv.getItem(value);
             if (item == null) continue;
-            materials.put(i, item.getType());
+            materials.put(i, new ItemWithQuantity(item.getType(), item.getAmount()));
         }
         var key = inv.getItem(ITEM_SLOT);
         Objects.requireNonNull(key);
+        Main.INSTANCE.config.save(new ItemWithQuantity(key.getType(), key.getAmount()), materials);
         // refund all items
         var item = inv.getItem(ITEM_SLOT);
         Objects.requireNonNull(item);
@@ -95,7 +94,6 @@ public class CommandHandler {
             if (craftSlotItem == null) continue;
             playerInv.addItem(craftSlotItem);
         }
-        Main.INSTANCE.config.save(Objects.requireNonNull(inv.getItem(ITEM_SLOT)).getType(), materials);
         // hack to reset gui after save
         onKeyItemChange(gui);
         gui.getInventory().clear(ITEM_SLOT);
