@@ -83,6 +83,18 @@ public class CommandHandler {
             if (item == null) continue;
             materials.put(i, item.getType());
         }
+        var key = inv.getItem(ITEM_SLOT);
+        Objects.requireNonNull(key);
+        // refund all items
+        var item = inv.getItem(ITEM_SLOT);
+        Objects.requireNonNull(item);
+        var playerInv = inv.getViewers().get(0).getInventory();
+        playerInv.addItem(item);
+        for (int slot : Constants.craftSlot2PrevSlot.values()) {
+            var craftSlotItem = inv.getItem(slot);
+            if (craftSlotItem == null) continue;
+            playerInv.addItem(craftSlotItem);
+        }
         Main.INSTANCE.config.save(Objects.requireNonNull(inv.getItem(ITEM_SLOT)).getType(), materials);
         // hack to reset gui after save
         onKeyItemChange(gui);
