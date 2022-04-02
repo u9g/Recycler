@@ -2,6 +2,7 @@ package com.github.u9g.recycler;
 
 import com.github.u9g.u9gutils.NBTUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -73,6 +74,9 @@ public class RecyclerOpenHandler implements Listener {
         var block = event.getBlock();
         var key = BlockNSKey.getAnvilNSKeyFor(block);
         NBTUtil.set(block.getChunk(), key, false);
+        event.setDropItems(false);
+        var loc = event.getBlock().getLocation();
+        loc.getWorld().dropItemNaturally(loc, Constants.RECYCLER_ITEM);
     }
 
     private void setupAnvilForUse(InventoryGUI gui) {
