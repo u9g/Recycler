@@ -73,10 +73,13 @@ public class RecyclerOpenHandler implements Listener {
     public void onBreakRecycler(BlockBreakEvent event) {
         var block = event.getBlock();
         var key = BlockNSKey.getAnvilNSKeyFor(block);
+        var opt = NBTUtil.getAsBoolean(block.getChunk(), key);
+        if (opt.orElse(false)) {
+            event.setDropItems(false);
+            var loc = event.getBlock().getLocation();
+            loc.getWorld().dropItemNaturally(loc, Constants.RECYCLER_ITEM);
+        }
         NBTUtil.set(block.getChunk(), key, false);
-        event.setDropItems(false);
-        var loc = event.getBlock().getLocation();
-        loc.getWorld().dropItemNaturally(loc, Constants.RECYCLER_ITEM);
     }
 
     private void setupAnvilForUse(InventoryGUI gui) {
